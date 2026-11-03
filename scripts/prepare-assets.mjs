@@ -1,0 +1,11 @@
+import { readdir, readFile, writeFile } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const files = (await readdir(path.join(root,'public','assets'))).filter(x=>/\.(mp4|mov|webm|png|jpe?g|webp)$/i.test(x)).sort();
+const filename=path.join(root,'src','project.json');
+const project=JSON.parse(await readFile(filename,'utf8'));
+project.scenes=project.scenes.map((scene,i)=>({...scene,asset:files.length?`assets/${files[i%files.length]}`:''}));
+await writeFile(filename,JSON.stringify(project,null,2)+'\n');
+console.log('Assets:',files);
+if(!files.length)console.warn('No assets found; output remains a demo composition.');

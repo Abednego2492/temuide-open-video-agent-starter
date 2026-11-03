@@ -1,0 +1,36 @@
+{
+  "fps": 30,
+  "width": 1080,
+  "height": 1920,
+  "durationFrames": 300,
+  "palette": {
+    "background": "#0B1020",
+    "foreground": "#FAFAF7",
+    "accent": "#C8FF3D"
+  },
+  "fontFamily": "Arial, sans-serif",
+  "title": "YOUR STORY, EDITED.",
+  "scenes": [
+    {
+      "id": "intro",
+      "startFrame": 0,
+      "durationFrames": 90,
+      "headline": "MAKE YOUR VIDEO",
+      "asset": ""
+    },
+    {
+      "id": "proof",
+      "startFrame": 90,
+      "durationFrames": 120,
+      "headline": "SHOW THE PROOF",
+      "asset": ""
+    },
+    {
+      "id": "outro",
+      "startFrame": 210,
+      "durationFrames": 90,
+      "headline": "YOUR NEXT VIDEO",
+      "asset": ""
+    }
+  ]
+}

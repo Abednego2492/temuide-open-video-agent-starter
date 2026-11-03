@@ -1,0 +1,11 @@
+import {execFileSync} from 'node:child_process';
+import {existsSync,readFileSync} from 'node:fs';
+const run=(cmd,args)=>{try{return execFileSync(cmd,args,{encoding:'utf8',stdio:['ignore','pipe','pipe']}).split('\n')[0]}catch{return null}};
+const project=JSON.parse(readFileSync('src/project.json','utf8'));
+const versions=[['Node',process.version,true],['npm',run('npm',['--version']),true],['FFmpeg',run('ffmpeg',['-version']),false],['FFprobe',run('ffprobe',['-version']),false]];
+for(const [name,value,required] of versions)console.log(`${value?'PASS':required?'FAIL':'WARN'} ${name}: ${value||'missing'}`);
+const installed=existsSync('node_modules/remotion/package.json');
+const valid=project.scenes.every(s=>s.startFrame>=0&&s.durationFrames>0&&s.startFrame+s.durationFrames<=project.durationFrames);
+console.log(installed?'PASS Remotion installed':'FAIL Remotion missing');
+console.log(valid?'PASS Scene bounds':'FAIL Invalid scene bounds');
+if(!installed||!valid||versions.some(v=>v[2]&&!v[1]))process.exitCode=1;

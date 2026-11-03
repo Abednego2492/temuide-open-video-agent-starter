@@ -1,0 +1,12 @@
+node_modules/
+.env
+.env.*
+!.env.example
+output/*
+!output/.gitkeep
+public/assets/*
+!public/assets/.gitkeep
+public/references/*
+!public/references/.gitkeep
+*.log
+.DS_Store

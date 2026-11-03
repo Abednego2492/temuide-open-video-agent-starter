@@ -1,0 +1,32 @@
+{
+  "name": "temuide-open-video-agent-starter",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Agent-assisted local Remotion video editing starter",
+  "scripts": {
+    "dev": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts DynamicEdit output/final.mp4",
+    "assets": "node scripts/prepare-assets.mjs",
+    "doctor": "node scripts/doctor.mjs",
+    "critic": "node scripts/critic.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.539",
+    "@remotion/media": "4.0.539",
+    "remotion": "4.0.539",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.8.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
