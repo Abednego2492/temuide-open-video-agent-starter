@@ -18,13 +18,17 @@ Read `AGENTS.md`, `BRIEF.md`, `src/project.json` and inventory `public/assets` /
 6. Derive typography, colors, density, camera and transition grammar from the reference and content. Never force a preset.
 7. Create an EDL and scene design contract. Record exact start/end frames and every major element's x/y/width/height/zIndex, text metrics and animation timing.
 
+## Voiceover (optional)
+If the brief asks for a voiceover, follow `docs/VOICEOVER.md`: model `eleven_v4`, audio tags for emotion, breath and pauses, numbers spelled out, English acronyms written phonetically. Transcribe every take back and keep the best. Generate the VO before timing scenes and let line lengths drive the timeline.
+
 ## Render
 - Use Remotion frame time: `useCurrentFrame`, `spring`, `interpolate`.
 - Never animate with uncontrolled browser timers.
 - Preserve source media, original speech, product identity and factual claims.
 - Keep one dominant focus per beat.
 - Use only properly licensed music, sound effects and artwork.
-- Run `npm run typecheck`, `npm run render`, `npm run critic`.
+- Run `npm run typecheck`, check `npm run stills` on hook / each scene / ending, then `npm run render` (or `npm run render:chunks`) and `npm run critic`.
+- Master audio to about −14 LUFS integrated, true peak ≤ −1 dBTP. Measure A/V sync from fully decoded audio, not `-ss` seeks.
 
 ## Independent critic
 Inspect the real MP4 at mobile viewing scale, plus transition boundaries and representative frames. Evaluate semantic continuity, visual hierarchy, text readability, B-roll relevance, mask quality, motion pacing, audio collisions, actual loudness and technical playback.
