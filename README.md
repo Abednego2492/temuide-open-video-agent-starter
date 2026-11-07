@@ -1,8 +1,22 @@
 # TEMUIDE Open Video Agent Starter 🎬
 
+![version](https://img.shields.io/badge/version-0.2.0-C6FF00) ![remotion](https://img.shields.io/badge/remotion-4.0.539-111) ![voice](https://img.shields.io/badge/voiceover-ElevenLabs%20v4-111)
+
 Turn a coding agent into a reference-driven video editing assistant in your own repository.
 
 **What works:** a Remotion starter composition, asset mapping, local preview and render scripts, a technical critic, and agent instructions. **What is not automatic yet:** semantic trimming, reference-style inference, matting, 3D motion, and professional creative review. The agent must implement and test those workflows for your footage. A successful MP4 render is not proof of editorial quality.
+
+## What's new in 0.2.0: Claude video editor workflow
+
+The workflow used to edit real videos end to end with Claude, operated from a phone:
+
+- **[Claude video editor workflow](docs/CLAUDE_VIDEO_EDITOR_WORKFLOW.md):** set up the sandbox, the verified toolchain (Whisper transcription, face detection, person cutout, Remotion), the edit order, and the mistakes to avoid.
+- **[Voiceover with Eleven v4](docs/VOICEOVER.md):** your own voice clone, audio tags for emotion, breath and pauses, best-of-N takes checked by transcription. `npm run vo -- examples/vo-lines.example.json public/vo`
+- **Resumable chunked render:** `COMP=DynamicEdit TOTAL=180 npm run render:chunks` renders in parts, joins them, masters audio to −14 LUFS and muxes.
+- **Layout check before rendering:** `COMP=DynamicEdit npm run stills -- 0 90 150`
+- **Style recipes:** [doodle career journey](examples/doodle-career-journey.md) and [live edit mode](examples/live-edit-mode.md).
+
+Full list in the [changelog](CHANGELOG.md).
 
 ## Quick start
 
@@ -25,7 +39,7 @@ npm run dev
 6. Have the agent implement the real edit, then run `npm run render` and `npm run critic`.
 7. Watch `output/final.mp4` and ask for timestamped corrections. The critic produces a **technical** report and leaves creative approval pending.
 
-Read [installation](docs/INSTALL.md), [editing contract](docs/EDITING_CONTRACT.md), [quality gates](docs/QUALITY_GATES.md), and [agent prompts](docs/AGENT_PROMPTS.md).
+Read [installation](docs/INSTALL.md), [Claude video editor workflow](docs/CLAUDE_VIDEO_EDITOR_WORKFLOW.md), [voiceover](docs/VOICEOVER.md), [editing contract](docs/EDITING_CONTRACT.md), [quality gates](docs/QUALITY_GATES.md), and [agent prompts](docs/AGENT_PROMPTS.md).
 
 ## Commands
 
@@ -36,6 +50,9 @@ Read [installation](docs/INSTALL.md), [editing contract](docs/EDITING_CONTRACT.m
 | `npm run assets` | Map media to starter scenes |
 | `npm run dev` | Remotion Studio preview |
 | `npm run render` | Render `output/final.mp4` |
+| `npm run render:chunks` | Resumable chunked render + audio master (`COMP`, `TOTAL` env) |
+| `npm run stills -- <frames>` | Render a few frames to `output/stills/` |
+| `npm run vo -- <lines.json> <outdir>` | ElevenLabs Eleven v4 voiceover with take scoring |
 | `npm run critic` | Probe video and write `output/critic-report.json` |
 | `npm run typecheck` | TypeScript validation |
 
@@ -51,7 +68,10 @@ The full creative stack is **not bundled**. Agent may add verified integrations 
 - `public/references/`: editing references, not committed.
 - `src/project.json`: editable scene timeline.
 - `src/video.tsx`: starter composition.
-- `output/`: renders and reports, not committed.
+- `output/`: renders, stills and reports, not committed.
+- `scripts/`: doctor, assets, critic, stills, chunked render, voiceover.
+- `examples/`: briefs, style recipes and a sample VO script.
+- `.env`: your local API keys (copy from `.env.example`), never committed.
 
 ## License and costs
 
