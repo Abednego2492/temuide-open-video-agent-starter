@@ -1,0 +1,38 @@
+{
+  "_readme": "Ganti path dan teks. Waktu dalam detik (timeline video lo ngomong). Lihat templates/kanvas-hidup/REMIX.md.",
+  "talking_head": "public/assets/{{video_lo_ngomong}}.mov",
+  "background": "public/assets/{{video_kanvas_hidup}}.mp4",
+  "output": "output/remix.mp4",
+  "work_dir": "output/remix_work/",
+
+  "background_timing": { "intro_seconds": 6.6, "intro_speed": 2.0 },
+  "grade": { "temperature": 4600, "fade_black": 0.09, "fade_white": 0.93 },
+  "mask": { "isnet_veto": true },
+
+  "presenter": { "scale": 0.70, "x": -20, "y": 636, "enter_at": 3.3 },
+  "hud": { "enabled": true, "label": "REVIEW MODE", "file_label": "kanvas_hidup.mp4", "cam_label": "cam 01 · {{nama}}" },
+
+  "style": {
+    "accent": "#C6FF00",
+    "ink": "#05070B",
+    "caption_size": 44,
+    "fonts": {
+      "headline": "fonts/PlayfairDisplay.ttf", "headline_weight": 900,
+      "caption": "fonts/PlayfairDisplay-Italic.ttf", "caption_weight": 500,
+      "ui": "fonts/Inter-SemiBold.ttf"
+    }
+  },
+
+  "headlines": [
+    { "lines": ["{{HOOK BARIS 1}}", "{{HOOK BARIS 2}}"], "start": 0.45, "end": 3.55, "x": 48, "y": 1230, "size": 124, "stagger": 0.9, "dim_background": false },
+    { "lines": ["{{PUNCH 1}}", "{{PUNCH 2}}"], "start": 10.85, "end": 13.4, "size": 140 },
+    { "lines": ["{{KEYWORD}}"], "start": 20.25, "end": 22.45, "size": 230, "accent": true }
+  ],
+
+  "captions": [
+    { "lines": ["{{caption baris 1}}", "{{baris 2}}"], "start": 4.0, "end": 7.8 },
+    { "lines": ["{{caption}}"], "start": 8.6, "end": 10.75 }
+  ],
+
+  "cta": { "text": "komen: {{KEYWORD}}", "start": 22.7 }
+}

@@ -1,10 +1,19 @@
 # TEMUIDE Open Video Agent Starter 🎬
 
-![version](https://img.shields.io/badge/version-0.2.0-C6FF00) ![remotion](https://img.shields.io/badge/remotion-4.0.539-111) ![voice](https://img.shields.io/badge/voiceover-ElevenLabs%20v4-111)
+![version](https://img.shields.io/badge/version-0.3.0-C6FF00) ![remotion](https://img.shields.io/badge/remotion-4.0.539-111) ![voice](https://img.shields.io/badge/voiceover-ElevenLabs%20v4-111)
 
 Turn a coding agent into a reference-driven video editing assistant in your own repository.
 
 **What works:** a Remotion starter composition, asset mapping, local preview and render scripts, a technical critic, and agent instructions. **What is not automatic yet:** semantic trimming, reference-style inference, matting, 3D motion, and professional creative review. The agent must implement and test those workflows for your footage. A successful MP4 render is not proof of editorial quality.
+
+## What's new in 0.3.0: Kanvas Hidup template
+
+A complete, story-free template for the "Kanvas Hidup" life/career journal video (ink thread on crumpled paper, walking mini character, voice-driven timeline), written in Indonesian for creators:
+
+- **[Template + workflow](templates/kanvas-hidup/README.md):** privacy first, story → VO → script table → build → still check → render → post.
+- **[Style guide](templates/kanvas-hidup/STYLE_GUIDE.md):** paper, ink thread, fonts and sizes, colours, character expressions, camera moves, timing formula, SFX, safe zones.
+- **[Copy-paste prompts](templates/kanvas-hidup/PROMPTS.md)** for each step, plus `story.template.json` and `vo-lines.template.json` with `{{placeholders}}`.
+- **[Remix](templates/kanvas-hidup/REMIX.md):** `npm run remix -- config.json` puts your talking-head cutout (rembg, optional ISNet veto) over a time-lapse of your Kanvas video with a review-mode HUD, warm faded grade, magazine-style captions and −14 LUFS audio. Resumable per stage, `--preview` for stills.
 
 ## What's new in 0.2.0: Claude video editor workflow
 
@@ -53,6 +62,7 @@ Read [installation](docs/INSTALL.md), [Claude video editor workflow](docs/CLAUDE
 | `npm run render:chunks` | Resumable chunked render + audio master (`COMP`, `TOTAL` env) |
 | `npm run stills -- <frames>` | Render a few frames to `output/stills/` |
 | `npm run vo -- <lines.json> <outdir>` | ElevenLabs Eleven v4 voiceover with take scoring |
+| `npm run remix -- <config.json>` | Talking-head cutout over a time-lapse background (see templates/kanvas-hidup/REMIX.md) |
 | `npm run critic` | Probe video and write `output/critic-report.json` |
 | `npm run typecheck` | TypeScript validation |
 
@@ -71,6 +81,7 @@ The full creative stack is **not bundled**. Agent may add verified integrations 
 - `output/`: renders, stills and reports, not committed.
 - `scripts/`: doctor, assets, critic, stills, chunked render, voiceover.
 - `examples/`: briefs, style recipes and a sample VO script.
+- `templates/kanvas-hidup/`: full Kanvas Hidup template (workflow, style guide, prompts, placeholders, remix).
 - `.env`: your local API keys (copy from `.env.example`), never committed.
 
 ## License and costs

@@ -34,8 +34,8 @@ Eleven v4 reads **audio tags** in square brackets as performance direction, not 
 Write the line the way you would *say* it to a friend, then direct it like a talent:
 
 ```text
-[storytelling, amused] Pagi... karyawan telat, lari ngibrit, masih sendal jepitan! [chuckles]
-[sarcastic] Yang gini... mau ditawarin Mercy? [laughs]
+[storytelling, amused] Hari pertama kerja... salah masuk ruang meeting, langsung disuruh presentasi! [chuckles]
+[sarcastic] Ya udah... presentasi aja. [laughs]
 ```
 
 Other settings that helped: `stability` 0.25–0.5 (lower = more expressive; the script cycles through several), `style` 0.45, `similarity_boost` 0.85, `language_code: "id"` for Indonesian.

@@ -10,3 +10,5 @@ public/references/*
 !public/references/.gitkeep
 *.log
 .DS_Store
+fonts/
+models/

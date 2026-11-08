@@ -1,0 +1,70 @@
+{
+  "_readme": "Salin ke public/assets/story.json lalu ganti semua {{...}}. Hapus stasiun yang gak dipakai. 4-7 stasiun paling enak ditonton. Jangan tulis nomor HP, email, gaji, atau nama orang.",
+  "creator": {
+    "name": "{{NAMA_PANGGILAN}}",
+    "handle": "@{{HANDLE_IG}}",
+    "face_reference": "public/assets/face.jpg",
+    "signature_look": "{{ciri khas buat karakter: mis. kacamata kotak, rambut belah samping, kaos polo putih}}"
+  },
+  "hook": {
+    "line": "{{kalimat hook, mis. 'Claude bisa juga ngedit video lucu?'}}",
+    "visual": "coretan kusut yang berubah jadi muka karakter"
+  },
+  "intro": {
+    "line": "{{mis. 'Halo, gue NAMA. Ini perjalanan karir gue di atas kanvas hidup.'}}"
+  },
+  "stations": [
+    {
+      "key": "s1",
+      "year": "{{TAHUN}}",
+      "role": "{{PERAN / STATUS, mis. Mahasiswa · Jurusan X}}",
+      "reality": ["{{realita lucu baris 1}}", "{{baris 2 (opsional)}}"],
+      "stamp": "{{1 angka bukti, mis. IPK 3,2 · 4 TAHUN}}",
+      "expr": "surprised",
+      "shape": "{{bentuk benang: toga / buku / laptop / mobil / toko / roket / ...}}"
+    },
+    {
+      "key": "s2",
+      "year": "{{TAHUN}}",
+      "role": "{{PERAN}}",
+      "reality": ["{{realita}}"],
+      "stamp": "{{ANGKA BUKTI}}",
+      "expr": "tired",
+      "shape": "{{BENTUK}}"
+    },
+    {
+      "key": "s3",
+      "year": "{{TAHUN}}",
+      "role": "{{PERAN}}",
+      "reality": ["{{realita}}"],
+      "stamp": "{{ANGKA BUKTI}}",
+      "expr": "referee",
+      "shape": "{{BENTUK}}"
+    },
+    {
+      "key": "s4",
+      "year": "{{TAHUN}}",
+      "role": "{{PERAN}}",
+      "reality": ["{{realita}}"],
+      "stamp": "{{ANGKA BUKTI}}",
+      "expr": "up-late",
+      "shape": "{{BENTUK}}"
+    },
+    {
+      "key": "s5",
+      "year": "{{TAHUN SEKARANG}}",
+      "role": "{{PERAN SEKARANG}}",
+      "reality": ["{{realita / hal yang lagi lo bangun}}"],
+      "stamp": "{{ANGKA BUKTI}}",
+      "expr": "fired-up",
+      "shape": "{{BENTUK}}"
+    }
+  ],
+  "reveal": {
+    "line": "{{mis. 'Kusut? Iya. Tapi semua garisnya nyambung.'}}"
+  },
+  "cta": {
+    "line": "{{mis. 'Pengen bikin video kayak gini juga? Follow, terus komen.'}}",
+    "on_screen": "{{mis. FOLLOW + KOMEN}}"
+  }
+}
