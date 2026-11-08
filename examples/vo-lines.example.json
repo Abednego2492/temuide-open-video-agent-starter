@@ -1,8 +1,8 @@
 [
   {"key": "hook", "text": "[curious, playful] Eh... Claude bisa ngedit video lucu juga? [chuckles]"},
-  {"key": "intro", "text": "[warm, friendly] Halo, gue Abed! Ini perjalanan karir gue. [short pause] Kusut? [laughs] Banget."},
-  {"key": "story", "text": "[storytelling, amused] Pagi... karyawan telat, lari ngibrit, masih sendal jepitan! [chuckles] [sarcastic] Yang gini... mau ditawarin Mercy? [laughs]"},
-  {"key": "build", "text": "[determined] Belajar dari nol, [tired laugh] tidur cuma dua jam sehari, buat bangun Temuide Gen Ei-Ai. [excited] Dari satu chat, jadi konten tiga puluh hari!"},
+  {"key": "intro", "text": "[warm, friendly] Halo, gue {{NAMA}}! Ini perjalanan karir gue. [short pause] Kusut? [laughs] Banget."},
+  {"key": "story", "text": "[storytelling, amused] {{kejadian lucu yang beneran lo alamin}}... [chuckles] [sarcastic] {{punchline}} [laughs]"},
+  {"key": "build", "text": "[determined] {{yang lagi lo bangun}}, [tired laugh] {{harga yang lo bayar}}. [excited] {{hasilnya, angka dieja}}!"},
   {"key": "reveal", "text": "[softly, reflective] Kelihatannya kusut ya... [short pause] tapi ternyata, semuanya nyambung."},
   {"key": "cta", "text": "[friendly, upbeat] Pengen bikin video kayak gini juga? Follow, terus komen. [playful] Nanti gue bagi tips-nya!"}
 ]

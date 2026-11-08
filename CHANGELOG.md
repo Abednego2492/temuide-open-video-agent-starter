@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.0 — 2026-11-09
+
+Kanvas Hidup template, usable by anyone without the author's story.
+
+### Added
+- `templates/kanvas-hidup/`: workflow README, STYLE_GUIDE, PROMPTS, REMIX guide, `story.template.json` and `vo-lines.template.json` with placeholders (Indonesian).
+- `scripts/remix/remix.py` + `remix.example.json`: talking-head cutout over a sped-up background video. Stages: warm faded grade, background time-lapse, rembg masks (u2net_human_seg, optional isnet-general-use veto against dark background leaks, biggest-blob cleanup, temporal smoothing), compose with review-mode HUD, headlines (auto-fit), static captions, CTA pill, two-pass loudnorm to −14 LUFS. Resumable, `--preview` stills.
+- npm script `remix`.
+
+### Changed
+- Example VO lines and the voiceover doc no longer contain the author's personal story; they use placeholders and a neutral example.
+- `.gitignore` ignores `fonts/` and `models/`.
+
 ## 0.2.0 — 2026-11-07
 
 Claude video editor workflow, tested on two real videos edited end to end from the Claude mobile app.

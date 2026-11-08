@@ -1,0 +1,11 @@
+[
+  {"key": "hook", "text": "[curious, playful] {{kalimat hook}}... [chuckles]"},
+  {"key": "intro", "text": "[warm, friendly] Halo, gue {{NAMA}}! Ini perjalanan karir gue. [short pause] Kusut? [laughs] Banget."},
+  {"key": "s1", "text": "[storytelling] {{tahun dieja}}... {{peran}}. [amused] {{realita, ditulis kayak ngomong}} [chuckles]"},
+  {"key": "s2", "text": "[storytelling, amused] {{realita}}... [sarcastic] {{punchline}} [laughs]"},
+  {"key": "s3", "text": "[exasperated] {{realita}}. [sighs] {{punchline}}"},
+  {"key": "s4", "text": "[tired laugh] {{realita}}... [short pause] {{punchline}}"},
+  {"key": "s5", "text": "[determined] {{yang lagi lo bangun sekarang}}. [excited] {{hasil / angka, dieja}}!"},
+  {"key": "reveal", "text": "[softly, reflective] Kelihatannya kusut ya... [short pause] tapi ternyata, semuanya nyambung."},
+  {"key": "cta", "text": "[friendly, upbeat] Pengen bikin video kayak gini juga? Follow, terus komen. [playful] {{ajakan}}!"}
+]
