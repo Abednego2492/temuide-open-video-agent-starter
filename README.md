@@ -1,10 +1,18 @@
 # TEMUIDE Open Video Agent Starter 🎬
 
-![version](https://img.shields.io/badge/version-0.3.0-C6FF00) ![remotion](https://img.shields.io/badge/remotion-4.0.539-111) ![voice](https://img.shields.io/badge/voiceover-ElevenLabs%20v4-111)
+![version](https://img.shields.io/badge/version-0.4.0-C6FF00) ![remotion](https://img.shields.io/badge/remotion-4.0.539-111) ![voice](https://img.shields.io/badge/voiceover-ElevenLabs%20v4-111)
 
 Turn a coding agent into a reference-driven video editing assistant in your own repository.
 
 **What works:** a Remotion starter composition, asset mapping, local preview and render scripts, a technical critic, and agent instructions. **What is not automatic yet:** semantic trimming, reference-style inference, matting, 3D motion, and professional creative review. The agent must implement and test those workflows for your footage. A successful MP4 render is not proof of editorial quality.
+
+## What's new in 0.4.0: 20 talking-head effects
+
+Record one talking-head take on a phone, then let the agent add effects from a single JSON file (guide in Indonesian):
+
+- **[Template + guide](templates/efek-talking-head/README.md):** how to shoot, the workflow, a table of all 20 effects with their settings, copy-paste prompts and common mistakes.
+- **`npm run effects -- config.json`** ([script](scripts/effects/effects.py), [example config](scripts/effects/effects.example.json)): text behind the body, cursor click, typed caption, clones, B/W background, freeze-to-sketch, dolly zoom, glitch, comment drop, paper tear, plus 10 bonus effects and an "in this video" list panel. `--preview` for stills, resumable stages, −14 LUFS audio.
+- Tested on a synthetic clip with hand-made masks. Automatic person masks reuse the rembg stage from the remix script and still need a check on your own footage.
 
 ## What's new in 0.3.0: Kanvas Hidup template
 
@@ -63,6 +71,7 @@ Read [installation](docs/INSTALL.md), [Claude video editor workflow](docs/CLAUDE
 | `npm run stills -- <frames>` | Render a few frames to `output/stills/` |
 | `npm run vo -- <lines.json> <outdir>` | ElevenLabs Eleven v4 voiceover with take scoring |
 | `npm run remix -- <config.json>` | Talking-head cutout over a time-lapse background (see templates/kanvas-hidup/REMIX.md) |
+| `npm run effects -- <config.json>` | 20 talking-head effects from one JSON file (see templates/efek-talking-head/README.md) |
 | `npm run critic` | Probe video and write `output/critic-report.json` |
 | `npm run typecheck` | TypeScript validation |
 
@@ -82,6 +91,7 @@ The full creative stack is **not bundled**. Agent may add verified integrations 
 - `scripts/`: doctor, assets, critic, stills, chunked render, voiceover.
 - `examples/`: briefs, style recipes and a sample VO script.
 - `templates/kanvas-hidup/`: full Kanvas Hidup template (workflow, style guide, prompts, placeholders, remix).
+- `templates/efek-talking-head/`: guide to the 20 talking-head effects (`scripts/effects/`).
 - `.env`: your local API keys (copy from `.env.example`), never committed.
 
 ## License and costs

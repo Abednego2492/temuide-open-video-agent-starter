@@ -1,0 +1,45 @@
+{
+  "_readme": "Ganti path, teks dan waktu (detik). Panduan: templates/efek-talking-head/README.md. 'n' = nomor baris panel yang disorot waktu efek itu jalan.",
+  "input": "public/assets/{{video_lo_ngomong}}.mov",
+  "output": "output/efek.mp4",
+  "work_dir": "output/effects_work/",
+  "mattes": "auto",
+
+  "accent": "#C6FF00",
+  "ink": "#05070B",
+  "fonts": {
+    "headline": "fonts/Anton-Regular.ttf",
+    "ui": "fonts/Inter-SemiBold.ttf",
+    "caption": "fonts/Inter-Bold.ttf",
+    "mono": "fonts/JetBrainsMono-Bold.ttf"
+  },
+
+  "panel": {
+    "title": "DI VIDEO INI", "start": 4.0, "end": 30.0, "x": 644, "y": 300, "w": 400, "footer": "+ 10 efek lagi",
+    "items": ["Teks di belakang", "Kursor klik", "Caption ngetik", "Kloning", "BG hitam putih", "Freeze sketsa", "Dolly zoom", "Glitch", "Komen jatuh", "Robek kertas"]
+  },
+
+  "effects": [
+    { "n": 1,  "type": "text_behind",   "start": 5.0,  "end": 7.2,  "text": "{{KATA}}", "sub": "{{baris kecil}}", "size": 300, "y": 520 },
+    { "n": 2,  "type": "cursor_click",  "start": 7.3,  "end": 9.2,  "to": [430, 560], "box": [300, 420, 440, 520], "label": "face.layer" },
+    { "n": 3,  "type": "type_caption",  "start": 9.3,  "end": 11.8, "text": "{{kalimat yang lagi lo omongin}}", "y": 1500 },
+    { "n": 4,  "type": "clones",        "start": 12.0, "end": 14.0, "count": 2, "spacing": 250, "delay": 4 },
+    { "n": 5,  "type": "bg_bw",         "start": 14.2, "end": 16.6 },
+    { "n": 6,  "type": "freeze_sketch", "start": 17.0, "end": 19.6, "hold": 0.35, "wipe": 0.7 },
+    { "n": 7,  "type": "dolly_zoom",    "start": 20.0, "end": 23.0, "amount": 0.35 },
+    { "n": 8,  "type": "glitch",        "start": 23.2, "end": 24.2 },
+    { "n": 9,  "type": "comment_drop",  "start": 24.5, "end": 27.0, "cards": [{ "name": "you", "text": "{{KEYWORD}}" }] },
+    { "n": 10, "type": "paper_tear",    "start": 27.3, "end": 28.6 },
+
+    { "type": "spotlight",     "start": 31.0, "end": 33.0 },
+    { "type": "neon_outline",  "start": 33.0, "end": 35.0 },
+    { "type": "echo_trail",    "start": 35.0, "end": 37.0, "count": 4, "step": 3 },
+    { "type": "impact_frame",  "start": 37.0, "end": 37.4 },
+    { "type": "vhs",           "start": 37.5, "end": 39.5 },
+    { "type": "mosaic_reveal", "start": 39.5, "end": 40.5 },
+    { "type": "duotone",       "start": 40.5, "end": 42.5 },
+    { "type": "polaroid",      "start": 42.5, "end": 44.5, "caption": "{{tulisan di foto}}" },
+    { "type": "split3",        "start": 44.5, "end": 46.5 },
+    { "type": "sticker",       "start": 46.5, "end": 48.5 }
+  ]
+}
