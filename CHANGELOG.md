@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.0 — 2026-11-10
+
+20 talking-head effects driven by one JSON file.
+
+### Added
+- `scripts/effects/effects.py` + `effects.example.json`: per-frame effect pipeline (OpenCV + PIL piped to ffmpeg). Ten main effects (text behind body, cursor click, typed caption, clones, B/W background, freeze-to-sketch, dolly zoom, glitch, comment drop, paper tear), ten bonus effects (spotlight, neon outline, echo trail, impact frame, VHS, mosaic reveal, duotone, polaroid, three-way split, sticker) and an "in this video" list panel. Stages: base, person masks only where an effect needs them, render, two-pass loudnorm to −14 LUFS. Resumable, `--preview` stills, `--list`.
+- `templates/efek-talking-head/README.md`: shooting tips, workflow, effect tables, prompts, common mistakes (Indonesian).
+- npm script `effects`.
+
+### Tested
+- All 20 effects, the panel, a full render and audio mastering on a 22 s synthetic clip with hand-made masks. Automatic rembg masks are not yet verified on real footage in this script.
+
 ## 0.3.0 — 2026-11-09
 
 Kanvas Hidup template, usable by anyone without the author's story.

@@ -1,6 +1,6 @@
 {
   "name": "temuide-open-video-agent-starter",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "description": "Agent-assisted local Remotion video editing starter with the Claude video editor workflow",
@@ -15,7 +15,8 @@
     "stills": "node scripts/stills.mjs",
     "render:chunks": "bash scripts/render_chunks.sh",
     "vo": "python3 scripts/vo_generate.py",
-    "remix": "python3 scripts/remix/remix.py"
+    "remix": "python3 scripts/remix/remix.py",
+    "effects": "python3 scripts/effects/effects.py"
   },
   "dependencies": {
     "@remotion/bundler": "4.0.539",
