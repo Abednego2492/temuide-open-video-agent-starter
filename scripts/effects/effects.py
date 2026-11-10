@@ -18,7 +18,7 @@ import cv2
 from PIL import Image, ImageDraw, ImageFont
 
 W, H, FPS = 1080, 1920, 30
-NEED_MATTE = {"text_behind", "clones", "bg_bw", "dolly_zoom", "spotlight", "neon_outline", "echo_trail", "sticker"}
+NEED_MATTE = {"text_behind", "clones", "bg_bw", "dolly_zoom", "spotlight", "neon_outline", "echo_trail", "sticker", "bg_world"}
 
 
 # ---------------------------------------------------------------- helpers
@@ -360,28 +360,84 @@ def fx_sticker(f, m, tl, dur, e, st, C):
     s = 1 + 0.05 * math.sin(clamp01(tl / 0.3) * math.pi)
     return zoom(out, s) if s > 1.001 else out
 
+def fx_bg_world(f, m, tl, dur, e, st, C):
+    """21 Ganti dunia: tembok di belakang dibuka jadi terowongan grid neon yang terus ketarik menjauh."""
+    hw, hh = W // 2, H // 2; acc = np.array(bgr(e.get("color", C["accent"])), np.float32)
+    ys, xs = np.nonzero(m[::4, ::4] > 0.5)
+    if "c" not in st: st["c"] = (xs.mean() * 4, (ys.min() + (ys.max() - ys.min()) * 0.3) * 4) if len(xs) else (W / 2, H * 0.4)
+    cx, cy = st["c"][0] / 2, st["c"][1] / 2; g = np.zeros((hh, hw), np.float32); ph = tl * e.get("speed", 0.9); N = e.get("rings", 9)
+    for k in range(N):                                        # bingkai yang membesar = terowongan ketarik
+        u = ((k + ph) % N) / N; sc = 0.04 + u ** 2.4 * 2.6; w2, h2 = hw * 0.62 * sc, hh * 0.62 * sc
+        cv2.rectangle(g, (int(cx - w2), int(cy - h2)), (int(cx + w2), int(cy + h2)), float(0.25 + 0.75 * u), max(1, int(1 + 7 * u)), cv2.LINE_AA)
+    for a in np.linspace(0, 2 * math.pi, e.get("rays", 20), endpoint=False):
+        cv2.line(g, (int(cx + math.cos(a) * 30), int(cy + math.sin(a) * 30)), (int(cx + math.cos(a) * 2400), int(cy + math.sin(a) * 2400)), 0.35, 2, cv2.LINE_AA)
+    rnd = random.Random(e.get("seed", 5))
+    for _ in range(e.get("stars", 70)):                       # bintang melesat keluar
+        a, u0, sp_ = rnd.uniform(0, 2 * math.pi), rnd.random(), rnd.uniform(0.5, 1.4); u = (u0 + tl * sp_ * 0.6) % 1; r0 = 40 + u ** 2 * 1300
+        cv2.line(g, (int(cx + math.cos(a) * r0), int(cy + math.sin(a) * r0)), (int(cx + math.cos(a) * r0 * 1.12), int(cy + math.sin(a) * r0 * 1.12)), 1.0, 2, cv2.LINE_AA)
+    yy, xx = np.mgrid[0:hh, 0:hw]; d = np.sqrt((xx - cx) ** 2 + (yy - cy) ** 2) / hh
+    g = g + cv2.GaussianBlur(g, (0, 0), 9) * 1.6
+    world = np.clip(g[:, :, None] * acc + (np.clip(1 - d * 1.3, 0, 1) ** 2)[:, :, None] * acc * 0.22 + np.array(bgr(e.get("sky", "#060A12")), np.float32), 0, 255)
+    world = cv2.resize(world.astype(np.uint8), (W, H), interpolation=cv2.INTER_LINEAR)
+    # transisi: lingkaran membuka dari belakang kepala
+    op = ease_out(tl / e.get("open", 0.45)) * (1 if e.get("hard_out", True) else clamp01((dur - tl) / 0.3))
+    Y, X = np.ogrid[0:H, 0:W]; rr = np.sqrt((X - st["c"][0]) ** 2 + (Y - st["c"][1]) ** 2); R = op * 2300
+    hole = np.clip((R - rr) / 40 + 0.5, 0, 1).astype(np.float32)
+    bg = mix(world, f, hole)
+    if 0 < op < 1:
+        ring = np.clip(1 - np.abs(rr - R) / 26, 0, 1).astype(np.float32); bg = np.clip(bg + ring[:, :, None] * 255, 0, 255).astype(np.uint8)
+    mm = cv2.GaussianBlur(cv2.erode(m, np.ones((5, 5), np.uint8)), (0, 0), 1.5)          # buang pinggiran warna tembok
+    if e.get("floor"): mm[int(e["floor"]):] = 1.0                    # baris di bawah ini (meja, dsb.) selalu dianggap depan
+    rim = np.clip(mm - cv2.GaussianBlur(mm, (0, 0), 16), 0, 1) * 0.9 * hole                       # cahaya tepi biar nyatu
+    subj = np.clip(f.astype(np.float32) * (1 - 0.18 * hole[:, :, None]) + rim[:, :, None] * acc, 0, 255).astype(np.uint8)
+    out = mix(subj, bg, mm)
+    if tl < 0.1: out = cv2.addWeighted(out, 1, np.full_like(out, 255), 0.5 * (1 - tl / 0.1), 0)
+    return out
+
+def fx_pill(f, m, tl, dur, e, st, C):
+    """Bantu: tulisan besar di dalam kapsul (judul, CTA). Bukan bagian dari 20 efek."""
+    if "L" not in st:
+        t = text_rgba(e["text"], font(C["fonts"][e.get("font", "headline")], e.get("size", 96)), rgb(e.get("color", C["ink"])))
+        px, py = e.get("pad", [44, 28]); c = card_rgba(t.shape[1] + px * 2, t.shape[0] + py * 2, rgb(e.get("bg", C["accent"])), e.get("radius", 30))
+        over(c[:, :, :3], t, px, py); st["L"] = c
+    a = inout(tl, dur, 0.12, 0.2); s = 0.7 + 0.3 * back_out(tl / 0.3)
+    return over(f, st["L"], e.get("x", W // 2), e.get("y", 1380), a, s, "c")
+
 
 EFFECTS = {n[3:]: fn for n, fn in list(globals().items()) if n.startswith("fx_")}
 
 
-# ---------------------------------------------------------------- panel daftar efek
+# ---------------------------------------------------------------- label + panel daftar efek
+def draw_label(f, tl, dur, e, st, C):
+    """Nama efek di kiri atas selama efeknya jalan: kalau efek punya "name"."""
+    if "lab_" not in st:
+        L = C.get("label", {}); num = text_rgba(f"{e['n']:02d}" if e.get("n") else "+", font(C["fonts"]["mono"], L.get("num_size", 40)), rgb(C["ink"]))
+        t = text_rgba(e["name"], font(C["fonts"]["headline"], L.get("size", 60)), (255, 255, 255)); hh_ = max(num.shape[0], t.shape[0]) + 36
+        c = card_rgba(num.shape[1] + t.shape[1] + 110, hh_, rgb(C["ink"]), 22, 240); nb = card_rgba(num.shape[1] + 36, hh_ - 20, rgb(C["accent"]), 14)
+        over(c[:, :, :3], nb, 10, 10)
+        over(c[:, :, :3], num, 28, (hh_ - num.shape[0]) // 2); over(c[:, :, :3], t, num.shape[1] + 70, (hh_ - t.shape[0]) // 2); st["lab_"] = c
+    L = C.get("label", {}); a = inout(tl, dur, 0.15, 0.2)
+    return over(f, st["lab_"], L.get("x", 50) - (1 - ease_out(tl / 0.3)) * 80, L.get("y", 210), a)
+
 def draw_panel(f, t, P, active, st, C):
-    """Panel 'DI VIDEO INI' di sisi kanan, baris efek yang lagi jalan disorot."""
-    items = P["items"]; rh = P.get("row", 74); w = P.get("w", 400); x = P.get("x", W - w - 36); y = P.get("y", 300)
-    h = 110 + rh * len(items) + (80 if P.get("footer") else 20)
+    """Panel 'DI VIDEO INI' di sisi kanan, baris efek yang lagi jalan disorot. "windows": [[mulai, selesai], ...] kalau panelnya muncul beberapa kali."""
+    wins = P.get("windows") or [[P.get("start", 0), P.get("end", 1e9)]]; win = next((w_ for w_ in wins if w_[0] <= t < w_[1]), None)
+    if win is None: return f
+    items = P["items"]; rh = P.get("row", 74); w = P.get("w", 400); x = P.get("x", W - w - 36); y = P.get("y", 300); fs = P.get("font_size", 38)
+    h = 96 + rh * len(items) + (rh + 8 if P.get("footer") else 16)
     if "bgc" not in st:
-        st["bgc"] = card_rgba(w, h, rgb(P.get("bg", C["ink"])), 30, 225); fm, fi = font(C["fonts"]["mono"], 26), font(C["fonts"]["ui"], 38)
+        st["bgc"] = card_rgba(w, h, rgb(P.get("bg", C["ink"])), 30, P.get("alpha", 225)); fm, fi = font(C["fonts"]["mono"], int(fs * 0.68)), font(C["fonts"]["ui"], fs)
         st["rows"] = [(text_rgba(f"{i + 1:02d}", fm, rgb(C["accent"])), text_rgba(s, fi, (255, 255, 255)), text_rgba(s, fi, rgb(C["ink"]))) for i, s in enumerate(items)]
-        st["title"] = text_rgba(P.get("title", "DI VIDEO INI"), fm, rgb(C["accent"])); st["hl"] = card_rgba(w - 20, rh - 8, (255, 255, 255), 14)
-        st["foot"] = text_rgba(P["footer"], font(C["fonts"]["ui"], 34), (255, 255, 255)) if P.get("footer") else None
-    a = inout(t - P.get("start", 0), P.get("end", 1e9) - P.get("start", 0), 0.3, 0.3); sx = x + (1 - ease_out((t - P.get("start", 0)) / 0.4)) * (w + 60)
+        st["title"] = text_rgba(P.get("title", "DI VIDEO INI"), fm, rgb(C["accent"])); st["hl"] = card_rgba(w - 20, rh - 6, (255, 255, 255), 14)
+        st["foot"] = text_rgba(P["footer"], font(C["fonts"]["ui"], fs), rgb(C["accent"])) if P.get("footer") else None
+    a = inout(t - win[0], win[1] - win[0], 0.3, 0.3); sx = x + (1 - ease_out((t - win[0]) / 0.4)) * (w + 60)
     over(f, st["bgc"], sx, y, a); over(f, st["title"], sx + 28, y + 34, a)
-    cnt = text_rgba(f"{(active or 0):02d} / {len(items):02d}", font(C["fonts"]["mono"], 26), rgb(C["accent"])); over(f, cnt, sx + w - cnt.shape[1] - 28, y + 34, a)
+    cnt = text_rgba(f"{(active or 0):02d} / {len(items):02d}", font(C["fonts"]["mono"], int(fs * 0.68)), rgb(C["accent"])); over(f, cnt, sx + w - cnt.shape[1] - 28, y + 34, a)
     for i, (num, wh, dk) in enumerate(st["rows"]):
-        ry = y + 96 + i * rh; on = active == i + 1; seen = active is not None and i + 1 <= active
-        if on: over(f, st["hl"], sx + 10, ry - 6, a)
-        over(f, num, sx + 30, ry + 14, a * (1 if seen else 0.5)); over(f, dk if on else wh, sx + 84, ry + 4, a * (1 if seen else 0.45))
-    if st["foot"] is not None: over(f, st["foot"], sx + 30, y + h - 62, a)
+        ry = y + 88 + i * rh; on = active == i + 1; seen = active is not None and i + 1 <= active
+        if on: over(f, st["hl"], sx + 10, ry - 3, a)
+        over(f, num, sx + 28, ry + (rh - 6 - num.shape[0]) // 2, a * (1 if seen else 0.5)); over(f, dk if on else wh, sx + 28 + int(fs * 1.4), ry + (rh - 6 - wh.shape[0]) // 2, a * (1 if seen else 0.45))
+    if st["foot"] is not None: over(f, st["foot"], sx + 28, y + h - rh - 2 + (rh - st["foot"].shape[0]) // 2, a)
     return f
 
 
@@ -421,7 +477,7 @@ def stage_masks(cfg, wd, base, only=None):
     return mdir
 
 def stage_render(cfg, wd, base, mdir, preview=None):
-    C = {"accent": cfg.get("accent", "#C6FF00"), "ink": cfg.get("ink", "#05070B"), "fonts": cfg["fonts"]}
+    C = {"accent": cfg.get("accent", "#C6FF00"), "ink": cfg.get("ink", "#05070B"), "fonts": cfg["fonts"], "label": cfg.get("label", {})}
     for k in ("ui", "mono", "caption"): C["fonts"].setdefault(k, C["fonts"].get("ui", C["fonts"]["headline"]))
     fx = sorted(cfg["effects"], key=lambda e: e["start"]); states = [dict() for _ in fx]; pst = {}
     for e in fx:
@@ -432,7 +488,7 @@ def stage_render(cfg, wd, base, mdir, preview=None):
         if done(out): return out
         ff = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "bgr24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
                                "-c:v", "libx264", "-crf", str(cfg.get("crf", 17)), "-preset", "medium", "-pix_fmt", "yuv420p", wd + "video.tmp.mp4"], stdin=subprocess.PIPE)
-    P = cfg.get("panel"); last_n = None
+    P = cfg.get("panel")
     for fi in range(n):
         ok, f = cap.read()
         if not ok: break
@@ -448,8 +504,11 @@ def stage_render(cfg, wd, base, mdir, preview=None):
         for e, s in active:
             if e["type"] in NEED_MATTE and m is None: sys.exit(f"efek {e['type']} butuh mask tapi m{fi:04d}.png gak ada")
             f = EFFECTS[e["type"]](f, m, t - e["start"], e["end"] - e["start"], e, s, C)
-            if e.get("n"): last_n = e["n"]
-        if P and P.get("start", 0) <= t < P.get("end", 1e9): f = draw_panel(f, t, P, last_n, pst, C)
+        seen = [e["n"] for e in fx if e.get("n") and e.get("name_start", e["start"]) <= t]
+        if P: f = draw_panel(f, t, P, max(seen) if seen else None, pst, C)
+        for e, s in zip(fx, states):                          # nama efek selalu di atas efeknya
+            a0, a1 = e.get("name_start", e["start"]), e.get("name_end", e["end"])
+            if e.get("name") and a0 <= t < a1: f = draw_label(f, t - a0, a1 - a0, e, s, C)
         if want is None: ff.stdin.write(np.ascontiguousarray(f).tobytes())
         elif fi in want: cv2.imwrite(wd + f"preview_{t:06.2f}.jpg", f, [cv2.IMWRITE_JPEG_QUALITY, 90])
         if want is None and fi % 150 == 0: print("render", fi, "/", n, flush=True)
