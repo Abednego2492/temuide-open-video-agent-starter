@@ -70,6 +70,10 @@ Tambahan di luar 20 efek:
 
 - `bg_world` (butuh mask): tembok di belakang lo dibuka jadi terowongan grid neon yang terus ketarik. Cocok kalau background lo polos dan `dolly_zoom` jadi gak keliatan. `floor` = baris piksel yang di bawahnya selalu dianggap depan (meja).
 - `pill`: tulisan besar dalam kapsul buat judul atau CTA.
+- `punch`: punch-in zoom cepat ke wajah.
+- **Grading:** `"grade": true` di config = bersihin noise HP, kontras S-curve, saturasi naik, tajam (CAS). Bisa juga diisi string filter ffmpeg sendiri. Footage HP indoor hampir selalu butuh ini.
+- **Urutan layer:** `"z": 1` bikin efek digambar belakangan. Contoh hook: teks di belakang badan (`z: 1`) tetap kelihatan walau background-nya gonta-ganti tiap setengah detik. `"skip": 0.6` bikin animasi langsung jadi di frame pertama (penting buat hook).
+- Caption ngetik otomatis ngecilin font kalau kalimatnya kepanjangan.
 - **Nama efek di layar:** kasih `"name": "KLONING"` di efek mana pun, namanya muncul di kiri atas selama efek jalan. `name_start` / `name_end` kalau mau muncul lebih awal (pas lo mulai nyebut namanya). Posisi diatur di `"label": {"x", "y", "size"}`.
 - **Panel muncul beberapa kali:** `"windows": [[7, 9.3], [12.6, 51]]`. Ukuran teks: `font_size`, `row`.
 
@@ -98,6 +102,17 @@ Tambahin efek baru di scripts/effects/effects.py: {{jelasin efeknya kayak ngobro
 Ikutin pola fungsi fx_ yang ada (frame, mask, detik lokal, durasi, pengaturan, state, warna).
 Tes di video gue pakai --preview, tunjukin still-nya ke gue.
 ```
+
+## Hook 3 detik pertama
+
+Frame pertama harus udah "jadi": teks besar di belakang badan (`skip`), lalu ganti background tiap ±0,5 detik pakai efek terbaik lo (terowongan, hitam putih, kloning, glitch) sambil lo ngomong kalimat pertama. Penonton liat preview efeknya sebelum sempat scroll.
+
+## Suara HP yang bersih
+
+```bash
+ffmpeg -i video.mov -vn -ac 1 -ar 48000 -af "highpass=f=90,arnndn=m=sh.rnnn:mix=0.85,afftdn=nr=10:nf=-50,equalizer=f=300:t=q:w=1.2:g=-3,equalizer=f=3500:t=q:w=1:g=3,highshelf=f=8000:g=2,deesser=i=0.4,acompressor=threshold=-22dB:ratio=3:attack=5:release=90:makeup=2dB,agate=threshold=0.012:ratio=3:range=0.12:attack=4:release=180" suara.wav
+```
+Model `sh.rnnn` dari repo GitHub `GregorR/rnnoise-models`. Lalu loudnorm ke −14 LUFS. Di video asli, noise di jeda turun ±25 dB.
 
 ## Yang sering salah
 

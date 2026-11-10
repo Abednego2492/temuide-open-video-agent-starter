@@ -18,6 +18,10 @@ import cv2
 from PIL import Image, ImageDraw, ImageFont
 
 W, H, FPS = 1080, 1920, 30
+# Grade bawaan ("grade": true): bersihin noise HP, kontras S-curve, warna lebih hidup, tajam. Boleh diganti string filter ffmpeg sendiri.
+GRADE = ("hqdn3d=2:1.5:5:4,eq=contrast=1.10:brightness=-0.02:saturation=1.18:gamma=0.97,"
+         "curves=master='0/0 0.12/0.08 0.5/0.5 0.85/0.9 1/1',colorbalance=rs=-0.03:bs=0.04:rh=0.03:bh=-0.03,"
+         "cas=strength=0.55,vignette=angle=PI/5")
 NEED_MATTE = {"text_behind", "clones", "bg_bw", "dolly_zoom", "spotlight", "neon_outline", "echo_trail", "sticker", "bg_world"}
 
 
@@ -101,7 +105,14 @@ def fx_text_behind(f, m, tl, dur, e, st, C):
             st["L"] = [text_rgba(ch, font(C["fonts"]["headline"], size), col) for ch in e["text"]]
             if sum(l.shape[1] for l in st["L"]) + e.get("gap", 6) * (len(e["text"]) - 1) <= W - 80 or size < 60: break
             size = int(size * 0.94)
-        st["sub"] = text_rgba(e["sub"], font(C["fonts"]["ui"], e.get("sub_size", 54)), rgb(e.get("sub_color", "#FFFFFF"))) if e.get("sub") else None
+        st["sub"] = None
+        if e.get("sub"):
+            t = text_rgba(e["sub"], font(C["fonts"]["ui"], e.get("sub_size", 54)), rgb(e.get("sub_color", C["ink"] if e.get("sub_pill", True) else "#FFFFFF")))
+            if e.get("sub_pill", True):                       # kapsul biar kebaca di tembok terang maupun gelap
+                c = card_rgba(t.shape[1] + 44, t.shape[0] + 26, rgb(e.get("sub_bg", "#FFFFFF")), 18); over(c[:, :, :3], t, 22, 13); t = c
+            st["sub"] = t
+        st["sh"] = [l.copy() for l in st["L"]]
+        for l in st["sh"]: l[:, :, :3] = 0
     gap = e.get("gap", 6); tot = sum(l.shape[1] for l in st["L"]) + gap * (len(st["L"]) - 1)
     x = (W - tot) // 2 if "x" not in e else e["x"]; y = e.get("y", 520); bg = f.copy()
     out_a = clamp01((dur - tl) / 0.25)
@@ -110,7 +121,9 @@ def fx_text_behind(f, m, tl, dur, e, st, C):
     for i, l in enumerate(st["L"]):
         p = (tl - i * e.get("stagger", 0.045)) / 0.28
         if p > 0:
-            over(bg, l, x + l.shape[1] // 2, y + hmax - l.shape[0] // 2 + (1 - ease_out(p)) * 90, clamp01(p * 2.5) * out_a, 0.6 + 0.4 * back_out(p), "c")
+            yy_ = y + hmax - l.shape[0] // 2 + (1 - ease_out(p)) * 90; sc_ = 0.6 + 0.4 * back_out(p)
+            if e.get("shadow", True): over(bg, st["sh"][i], x + l.shape[1] // 2 + 8, yy_ + 12, 0.35 * clamp01(p * 2.5) * out_a, sc_, "c")
+            over(bg, l, x + l.shape[1] // 2, yy_, clamp01(p * 2.5) * out_a, sc_, "c")
         x += l.shape[1] + gap
     return mix(f, bg, m)
 
@@ -139,10 +152,16 @@ def fx_cursor_click(f, m, tl, dur, e, st, C):
 
 def fx_type_caption(f, m, tl, dur, e, st, C):
     """03 Caption gaya command bar: huruf ngetik sendiri, kursor blok kedip."""
-    fnt = font(C["fonts"]["mono"], e.get("size", 46)); txt = e["text"]; y = e.get("y", 1500); pad = 34
-    if "full" not in st: st["full"] = text_rgba("› " + txt + "  ", fnt, (255, 255, 255))
+    txt = e["text"]; y = e.get("y", 1500); pad = 34
+    if "fnt" not in st:                                       # kecilin font sampai seluruh kalimat muat di layar
+        size = e.get("size", 46)
+        while True:
+            st["fnt"] = font(C["fonts"]["mono"], size); st["full"] = text_rgba("› " + txt + "  ", st["fnt"], (255, 255, 255))
+            if st["full"].shape[1] + pad * 2 + 30 <= W - 80 or size <= 26: break
+            size -= 2
+    fnt = st["fnt"]
     n = int(len(txt) * clamp01(tl / e.get("type_time", max(0.4, dur * 0.6))))
-    bw, bh = min(W - 80, st["full"].shape[1] + pad * 2), st["full"].shape[0] + pad
+    bw, bh = st["full"].shape[1] + pad * 2 + 30, st["full"].shape[0] + pad
     x = (W - bw) // 2; a = inout(tl, dur, 0.15, 0.2)
     over(f, card_rgba(bw, bh, rgb(C["ink"]), 22, 235), x, y, a)
     k = ("t", n)
@@ -404,6 +423,14 @@ def fx_pill(f, m, tl, dur, e, st, C):
     return over(f, st["L"], e.get("x", W // 2), e.get("y", 1380), a, s, "c")
 
 
+def fx_punch(f, m, tl, dur, e, st, C):
+    """Bantu: punch-in zoom cepat ke satu titik (default wajah/atas badan), balik pelan."""
+    if "c" not in st:
+        ys, xs = (np.nonzero(m[::4, ::4] > 0.5) if m is not None else ((), ()))
+        st["c"] = e.get("at") or ((xs.mean() * 4, (ys.min() + (ys.max() - ys.min()) * 0.25) * 4) if len(xs) else (W / 2, H * 0.38))
+    a = back_out(tl / e.get("in", 0.18)) if tl < e.get("in", 0.18) else 1 - ease_in_out((tl - e.get("in", 0.18)) / max(0.01, dur - e.get("in", 0.18))) * e.get("release", 1.0)
+    return zoom(f, 1 + e.get("amount", 0.12) * a, *st["c"])
+
 EFFECTS = {n[3:]: fn for n, fn in list(globals().items()) if n.startswith("fx_")}
 
 
@@ -445,7 +472,9 @@ def draw_panel(f, t, P, active, st, C):
 def stage_base(cfg, wd):
     out = wd + "base.mp4"
     if done(out): return out
-    vf = f"fps={FPS},scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},format=yuv420p"
+    vf = f"fps={FPS},scale={W}:{H}:force_original_aspect_ratio=increase:flags=lanczos,crop={W}:{H}"
+    if cfg.get("grade"): vf += "," + (GRADE if cfg["grade"] is True else cfg["grade"])
+    vf += ",format=yuv420p"
     cmd = ["ffmpeg", "-v", "error", "-y", "-i", cfg["input"]] + (["-t", str(cfg["duration"])] if cfg.get("duration") else [])
     run(cmd + ["-vf", vf, "-an", "-c:v", "libx264", "-crf", "14", "-preset", "veryfast", wd + "base.tmp.mp4"])
     os.rename(wd + "base.tmp.mp4", out); return out
@@ -479,7 +508,7 @@ def stage_masks(cfg, wd, base, only=None):
 def stage_render(cfg, wd, base, mdir, preview=None):
     C = {"accent": cfg.get("accent", "#C6FF00"), "ink": cfg.get("ink", "#05070B"), "fonts": cfg["fonts"], "label": cfg.get("label", {})}
     for k in ("ui", "mono", "caption"): C["fonts"].setdefault(k, C["fonts"].get("ui", C["fonts"]["headline"]))
-    fx = sorted(cfg["effects"], key=lambda e: e["start"]); states = [dict() for _ in fx]; pst = {}
+    fx = sorted(cfg["effects"], key=lambda e: (e.get("z", 0), e["start"])); states = [dict() for _ in fx]; pst = {}
     for e in fx:
         if e["type"] not in EFFECTS: sys.exit(f"efek gak dikenal: {e['type']} (lihat --list)")
     cap = cv2.VideoCapture(base); n = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)); out = wd + "video.mp4"
@@ -488,7 +517,7 @@ def stage_render(cfg, wd, base, mdir, preview=None):
         if done(out): return out
         ff = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "bgr24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
                                "-c:v", "libx264", "-crf", str(cfg.get("crf", 17)), "-preset", "medium", "-pix_fmt", "yuv420p", wd + "video.tmp.mp4"], stdin=subprocess.PIPE)
-    P = cfg.get("panel")
+    P = cfg.get("panel")      # efek dengan z lebih besar digambar belakangan (di atas)
     for fi in range(n):
         ok, f = cap.read()
         if not ok: break
@@ -503,7 +532,7 @@ def stage_render(cfg, wd, base, mdir, preview=None):
             if m is not None: s.setdefault("buf", []).append((f.copy(), m.copy()))
         for e, s in active:
             if e["type"] in NEED_MATTE and m is None: sys.exit(f"efek {e['type']} butuh mask tapi m{fi:04d}.png gak ada")
-            f = EFFECTS[e["type"]](f, m, t - e["start"], e["end"] - e["start"], e, s, C)
+            f = EFFECTS[e["type"]](f, m, t - e["start"] + e.get("skip", 0), e["end"] - e["start"] + e.get("skip", 0), e, s, C)   # skip: mulai animasi dari tengah
         seen = [e["n"] for e in fx if e.get("n") and e.get("name_start", e["start"]) <= t]
         if P: f = draw_panel(f, t, P, max(seen) if seen else None, pst, C)
         for e, s in zip(fx, states):                          # nama efek selalu di atas efeknya
